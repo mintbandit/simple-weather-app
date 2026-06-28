@@ -1,3 +1,7 @@
+import axios from "axios";
+import MockAdapter from "axios-mock-adapter";
+import { fetchLocationData } from "./location";
+
 const SAMPLE_API_RESPONSE = [
   {
     place_id: 287781008,
@@ -11,7 +15,7 @@ const SAMPLE_API_RESPONSE = [
     display_name: 'Los Angeles, Los Angeles County, California, United States',
     class: 'boundary',
     type: 'administrative',
-    importance: 0.9738053728457621
+    importance: 0.9738053728457621,
   },
   {
     place_id: 259239981,
@@ -25,7 +29,31 @@ const SAMPLE_API_RESPONSE = [
     display_name: 'University of California, Los Angeles, Bellagio Road, Bel Air, Bel-Air, Los Angeles, Los Angeles County, California, 90049, United States',
     class: 'amenity',
     type: 'university',
-    importance: 0.8181396344174214
+    importance: 0.8181396344174214,
   },
 ];
 
+// Test assumes GEOCODE_API_KEY env variable is not set
+it('should convert API response', async () => {
+  const httpClient = new MockAdapter(axios);
+  const GEOCODE_API_URL = "https://geocode.maps.co/search";
+  httpClient.onGet(GEOCODE_API_URL, { params: { q: "test", api_key: undefined } }).reply(200, SAMPLE_API_RESPONSE);
+
+  await fetchLocationData(axios, GEOCODE_API_URL, 'test');
+});
+
+it('throws error when response is not 200', async () => {
+  const httpClient = new MockAdapter(axios);
+  const GEOCODE_API_URL = "https://geocode.maps.co/search";
+  httpClient.onGet(GEOCODE_API_URL, { params: { q: "test" } }).reply(400, SAMPLE_API_RESPONSE);
+
+  await expect(fetchLocationData(axios, GEOCODE_API_URL, 'test')).rejects.toThrow();
+});
+
+it('throws error when API response changes', async () => {
+  const httpClient = new MockAdapter(axios);
+  const GEOCODE_API_URL = "https://geocode.maps.co/search";
+  httpClient.onGet(GEOCODE_API_URL, { params: { q: "test" } }).reply(200, { })
+
+  await expect(fetchLocationData(axios, GEOCODE_API_URL, 'test')).rejects.toThrow();
+});
