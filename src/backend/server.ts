@@ -8,6 +8,7 @@ import path from "node:path";
 import { z } from "zod";
 import { fetchLocationData } from "./location";
 import { fetchWeatherData } from "./weatherapi";
+import type { FastifyRequest, FastifyReply } from "fastify";
 
 dotenv.config({ quiet: true });
 
@@ -23,12 +24,10 @@ const server = fastify({
   logger: true,
 });
 
-{
-  server.register(formBody);
-  server.register(staticFiles, {
-    root: path.join(__dirname,'../../dist'),
-  });
-}
+server.register(formBody);
+server.register(staticFiles, {
+  root: path.join(__dirname,'../../dist'),
+});
 
 const weatherCodeToImage = (code: number): string => {
   switch (code) {
@@ -68,7 +67,7 @@ const locationSchema = z.object({
   location: z.string(),
 })
 
-server.get('/', async (request, reply) => {
+server.get('/', async (request: FastifyRequest, reply: FastifyReply) => {
   const queryParams = request.query;
   try {
     const { location } = locationSchema.parse(queryParams);
