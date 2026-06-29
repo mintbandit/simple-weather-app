@@ -9,7 +9,7 @@ import { z } from "zod";
 import { fetchLocationData } from "./location";
 import { fetchWeatherData } from "./weatherapi";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const environment = process.env.NODE_ENV;
 const templates = new nunjucks.Environment(new nunjucks.FileSystemLoader('src/backend/templates'));
