@@ -1,2 +1,5 @@
 allowBuilds:
+  '@parcel/watcher': true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - tailwindcss@4.3.2
